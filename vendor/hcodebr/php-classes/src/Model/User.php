@@ -10,6 +10,7 @@ class User extends Model
 {
 
     const SESSION = "User";
+    //const SECRET = "HcodePhp7_Secret";
 
     public static function login($login, $password)
     {
@@ -128,7 +129,8 @@ class User extends Model
 
     }
 
-    public function delete(){
+    public function delete()
+    {
 
         $sql = new Sql();
 
@@ -137,5 +139,53 @@ class User extends Model
         ));
 
     }
+/*
+    public static function getForgot($email)
+    {
+
+        $sql = new Sql();
+
+        $results = $sql->select("
+        SELECT * 
+        FROM tb_presosns a 
+        INNER JOIN tb_users b USING(idperson) 
+        WHERE a,desemail = :email", 
+        array(
+            ":email"=>$email
+        ));
+
+        if (count($results) === 0) 
+        {
+
+            throw new \Exception("Email não cadastrado em nossa base de dados.");
+            
+        }
+        else
+        {
+
+            $data = $results[0];
+
+            $results2 = $sql->select("CALL sp_userpasswordsrecoveries_create(:iduser, :desip)", array(
+                ":iduser"=>$data["iduser"],
+                ":desip"=>$_SERVER["REMOTE_ADDR"]
+            ));
+
+            if (count($results2) === 0 ) 
+            {
+                throw new \Exception("Não foi possível recuperar a senha");
+            }
+            else
+            {
+
+                $dataRecovery = $results2[0];
+
+                $code = base64_encode(mcrypt_encrypt(MCRYPT_RIJNDAEL_128, User::SECRET, $dataRecovery["idrecovery"], MCRYPT_MODE_ECB));
+
+            }
+
+        }
+
+    }
+    */
 
 }
