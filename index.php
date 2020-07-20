@@ -14,7 +14,10 @@ $app->config('debug', true);
 
 $app->get('/', function() {
     
-	$page = new Page();
+	$page = new Page([
+		"header"=>false,
+		"footer"=>false
+	]);
 
 	$page->setTpl("index");
 
@@ -43,7 +46,7 @@ $app->get('/admin/login', function() {
 
 $app->post('/admin/login', function() {
     
-	User::login($_POST["login"], $_POST["password"]);
+	User::login($_POST["usu_rs"], $_POST["password"]);
 
 	header("Location: /admin");
 	exit;
@@ -54,7 +57,7 @@ $app->get('/admin/logout', function() {
     
 	User::logout();
 
-	header("Location: /admin/login");
+	header("Location: /");
 	exit;
 
 });

@@ -3,21 +3,22 @@
 namespace Hcode\Model;
 
 #use Exception;
-use \Hcode\DB\Sqlpgsql;
+use \Hcode\DB\Sql;
 use \Hcode\Model;
 
 class User extends Model
 {
 
     const SESSION = "User";
+    //const SECRET = "HcodePhp7_Secret";
 
-    public static function login($usu_rs, $password)
+    public static function login($login, $password)
     {
 
-        $sql = new Sqlpgsql();
+        $sql = new Sql();
 
-        $results = $sql->select("SELECT * FROM tb_usuario WHERE usu_rs = :usu_rs", array(
-            ":usu_rs"=>$usu_rs
+        $results = $sql->select("SELECT * FROM tb_users WHERE deslogin = :LOGIN", array(
+            ":LOGIN"=>$login
         ));
 
         if (count($results) === 0) 
@@ -27,7 +28,7 @@ class User extends Model
 
         $data = $results[0];
 
-        if (password_verify($password, $data["usu_cd_senha"]) === true) 
+        if (password_verify($password, $data["despassword"]) === true) 
         {
             
             $user = new User();
@@ -51,8 +52,12 @@ class User extends Model
             !isset($_SESSION[User::SESSION])
             ||
             !$_SESSION[User::SESSION]
+            ||
+            !(int)$_SESSION[User::SESSION]["iduser"] > 0
+            ||
+            (bool)$_SESSION[User::SESSION]["inadmin"] !== $inadmin
         ) {
-            header("Location: /");
+            header("Location: /admin/login");
             exit;
         }
 
@@ -68,7 +73,7 @@ class User extends Model
     public static function listAll()
     {
 
-        $sql = new Sqlpgsql();
+        $sql = new Sql();
 
         return $sql->select("SELECT * FROM tb_users a INNER JOIN tb_persons b USING(idperson) ORDER BY desperson");
 
@@ -77,7 +82,7 @@ class User extends Model
     public function save()
     {
 
-        $sql = new Sqlpgsql();
+        $sql = new Sql();
 
         $results = $sql->select("CALL sp_users_save(:desperson, :deslogin, :despassword, :desemail, :nrphone, :inadmin)", array(
             ":desperson"=>$this->getdesperson(),
@@ -95,7 +100,7 @@ class User extends Model
     public function get($iduser)
     {
 
-        $sql = new Sqlpgsql();
+        $sql = new Sql();
 
         $results = $sql->select("SELECT * FROM tb_users a INNER JOIN tb_persons b USING(idperson) WHERE a.iduser = :iduser", array(
             "iduser"=>$iduser
@@ -108,7 +113,7 @@ class User extends Model
     public function update()
     {
 
-        $sql = new Sqlpgsql();
+        $sql = new Sql();
 
         $results = $sql->select("CALL sp_usersupdate_save(:iduser, :desperson, :deslogin, :despassword, :desemail, :nrphone, :inadmin)", array(
             ":iduser"=>$this->getiduser(),
@@ -127,7 +132,7 @@ class User extends Model
     public function delete()
     {
 
-        $sql = new Sqlpgsql();
+        $sql = new Sql();
 
         $sql->query("CALL sp_users_delete(:iduser)", array(
             ":iduser"=>$this->getiduser()
@@ -138,7 +143,7 @@ class User extends Model
     public static function getForgot($email)
     {
 
-        $sql = new Sqlpgsql();
+        $sql = new Sql();
 
         $results = $sql->select("
         SELECT * 
